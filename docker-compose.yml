@@ -1,11 +1,13 @@
 services:
   api:
+    container_name: saleor_api
     image: ghcr.io/saleor/saleor:3.23
     #ports:
     #  - 8000:8000
     restart: unless-stopped
     networks:
       - saleor-backend-tier
+      - proxy
     stdin_open: true
     tty: true
     depends_on:
@@ -20,14 +22,17 @@ services:
       - common.env
       - backend.env
     environment:
-      - DASHBOARD_URL=https://porcuvermis.studio
+      - DASHBOARD_URL=https://dash.porcuvermis.studio
       - ALLOWED_HOSTS=localhost,127.0.0.1,api,porcuvermis.studio
 
   dashboard:
     image: ghcr.io/saleor/saleor-dashboard:3.23
-    ports:
-      - "100.100.10.3:9000:80"
+    container_name: saleor_dash
+    #ports:
+    #  - "9000:80"
     restart: unless-stopped
+    networks:
+      - proxy
 
   db:
     image: library/postgres:15-alpine
@@ -72,23 +77,26 @@ services:
   jaeger:
     image: jaegertracing/jaeger
     ports:
-      - "16686:16686"
+    #  - "16686:16686"
       - "4317:4317"
       - "4318:4318"
     restart: unless-stopped
     networks:
+      - proxy
       - saleor-backend-tier
     volumes:
       - type: tmpfs
         target: /tmp
 
   mailpit:
+    container_name: saleor_mailpit
     image: axllent/mailpit
     ports:
       - 1025:1025 # smtp server
-      - 100.100.10.3:8025:8025 # web ui. Visit http://localhost:8025/ to check emails
+     # - 100.100.10.3:8025:8025 # web ui. Visit http://localhost:8025/ to check emails
     restart: unless-stopped
     networks:
+      - proxy
       - saleor-backend-tier
 
 volumes:
