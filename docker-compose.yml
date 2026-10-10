@@ -109,3 +109,6 @@ volumes:
 networks:
   saleor-backend-tier:
     driver: bridge
+  proxy:
+    name: proxy
+    external: true
